@@ -35,7 +35,7 @@ const dockedDash = new Lang.Class({
         this._signalHandler = new Convenience.globalSignalHandler();
 
         // authohide current status. Not to be confused with autohide enable/disagle global (g)settings
-        this._autohideStatus = this._settings.get_boolean('autohide') && !this._settings.get_boolean('dock-fixed');
+        this._isAutohideEnabled = this._settings.get_boolean('autohide') && !this._settings.get_boolean('dock-fixed');
 
         // initialize animation status object
         this._animStatus = new animationStatus(true);
@@ -274,7 +274,7 @@ const dockedDash = new Lang.Class({
                     this._hoverChanged();
                     return false;
                 }));
-        } else if(this._settings.get_boolean('autohide') && this._autohideStatus) {
+        } else if(this._settings.get_boolean('autohide') && this._isAutohideEnabled){
             if( this._box.hover ) {
                 this._show();
             } else {
@@ -287,7 +287,7 @@ const dockedDash = new Lang.Class({
 
         var anim = this._animStatus;
 
-        if( this._autohideStatus && ( anim.hidden() || anim.hiding() ) ){
+        if( this._isAutohideEnabled && ( anim.hidden() || anim.hiding() ) ){
 
             let delay;
             // If the dock is hidden, wait this._settings.get_double('show-delay') before showing it; 
@@ -309,7 +309,7 @@ const dockedDash = new Lang.Class({
         var anim = this._animStatus;
 
         // If no hiding animation is running or queued
-        if( this._autohideStatus && (anim.showing() || anim.shown()) ){
+        if( this._isAutohideEnabled && (anim.showing() || anim.shown()) ){
 
             let delay;
 
@@ -472,10 +472,10 @@ const dockedDash = new Lang.Class({
             this._defaultBackgroundColor.blue + ','+
             newAlpha + ')';
 
-        if(this._settings.get_boolean('opaque-background') && (this._autohideStatus || this._settings.get_boolean('opaque-background-always'))){
+        if(this._settings.get_boolean('opaque-background') && (this._isAutohideEnabled || this._settings.get_boolean('opaque-background-always'))){
             this._fadeInBackground(this._settings.get_double('animation-time'), 0);
         }
-        else if(!this._settings.get_boolean('opaque-background') || (!this._autohideStatus && !this._settings.get_boolean('opaque-background-always'))) {
+        else if(!this._settings.get_boolean('opaque-background') || (!this._isAutohideEnabled && !this._settings.get_boolean('opaque-background-always'))) {
             this._fadeOutBackground(this._settings.get_double('animation-time'), 0);
         }
     },
@@ -631,14 +631,14 @@ const dockedDash = new Lang.Class({
     },
 
     _onDragStart: function(){
-        this._oldAutohideStatus = this._autohideStatus;
-        this._autohideStatus = false;
+        this._oldAutohideStatus = this._isAutohideEnabled;
+        this._isAutohideEnabled = false;
         this._animateIn(this._settings.get_double('animation-time'), 0);
     },
 
     _onDragEnd: function(){
         if(this._oldAutohideStatus)
-            this._autohideStatus  = this._oldAutohideStatus;
+            this._isAutohideEnabled  = this._oldAutohideStatus;
         this._box.sync_hover();
         if(Main.overview._shown)
             this._pageChanged();
@@ -831,8 +831,8 @@ const dockedDash = new Lang.Class({
 
     // Disable autohide effect, thus show dash
     disableAutoHide: function() {
-        if(this._autohideStatus==true){
-            this._autohideStatus = false;
+        if(this._isAutohideEnabled==true){
+            this._isAutohideEnabled = false;
 
             this._removeAnimations();
             this._animateIn(this._settings.get_double('animation-time'), 0);
@@ -843,11 +843,11 @@ const dockedDash = new Lang.Class({
 
     // Enable autohide effect, hide dash
     enableAutoHide: function() {
-        if(this._autohideStatus==false){
+        if(this._isAutohideEnabled==false){
 
             let delay=0; // immediately fadein background if hide is blocked by mouseover,
                          // oterwise start fadein when dock is already hidden.
-            this._autohideStatus = true;
+            this._isAutohideEnabled = true;
             this._removeAnimations();
 
             if(this._box.hover==true)
