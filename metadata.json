@@ -1,10 +1,10 @@
 {
-"shell-version": ["3.12"],
-"uuid": "dash-to-dock@micxgx.gmail.com",
-"name": "Dash to Dock",
-"description": "A dock for the Gnome Shell.This extension moves the dash out of the overview transforming it in a dock for an easier launching of applications and a faster switching between windows and desktops.",
-"original-author": "micxgx@gmail.com",
-"url": "http://micheleg.github.io/dash-to-dock/",
-"gettext-domain": "dashtodock",
+"shell-version": ["3.12", "3.10"],
+"uuid": "dash-to-dock-on-bottom@ktkr3d.gmail.com",
+"name": "Dash to Dock on Bottom",
+"description": "Dash to Dock on Bottom is a Dock for the Gnome shell",
+"original-author": "",
+"url": "https://github.com/ktkr3d/dash-to-dock-on-bottom",
+"gettext-domain": "nos-dock",
 "version": 0
 }

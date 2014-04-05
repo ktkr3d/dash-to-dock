@@ -32,8 +32,12 @@ const handledWindowTypes = [
  * 
 */
 
-const intellihide = new Lang.Class({
-    Name: 'Intellihide',
+let intellihide = function(show, hide, target, settings) {
+
+    this._init(show, hide, target, settings);
+} 
+
+intellihide.prototype = {
 
     _init: function(show, hide, target, settings) {
 
@@ -124,6 +128,9 @@ const intellihide = new Lang.Class({
         // initialize: call show forcing to initialize status variable
         this._show(true);
 
+        // Load optional features
+        this._optionalBoltSupport();
+
         // update visibility
         this._updateDockVisibility();
     },
@@ -135,7 +142,6 @@ const intellihide = new Lang.Class({
 
         if(this._windowChangedTimeout>0)
             Mainloop.source_remove(this._windowChangedTimeout); // Just to be sure
-        this._windowChangedTimeout=0;
     },
 
     _bindSettingsChanges: function() {
@@ -180,11 +186,12 @@ const intellihide = new Lang.Class({
         this.status = undefined;
         this._disableIntellihide = false;
         this._updateDockVisibility();
-
+        this._show();
     },
 
     _overviewEnter: function() {
         this._disableIntellihide = true;
+        this._hide();
     },
 
     _grabOpBegin: function() {
@@ -210,7 +217,6 @@ const intellihide = new Lang.Class({
             if(this._windowChangedTimeout>0)
                 Mainloop.source_remove(this._windowChangedTimeout);
 
-            this._windowChangedTimeout=0;
             this._updateDockVisibility();
         }
     },
@@ -329,6 +335,50 @@ const intellihide = new Lang.Class({
         }
         return false;
 
+    },
+
+    // Optional features enable/disable
+
+    // Basic bolt extension support
+    _optionalBoltSupport: function() {
+
+        let label = 'optionalBoltSupport';
+
+        this._settings.connect('changed::bolt-support',Lang.bind(this, function(){
+            if(this._settings.get_boolean('bolt-support'))
+                Lang.bind(this, enable)();
+            else
+                Lang.bind(this, disable)();
+        }));
+
+        if(this._settings.get_boolean('bolt-support'))
+            Lang.bind(this, enable)();
+
+        function enable() {
+            this._signalHandler.disconnectWithLabel(label);
+            this._signalHandler.pushWithLabel(label,
+                [
+                    Main.overview,
+                    'bolt-showing',
+                    Lang.bind(this, function(){
+                        this._disableIntellihide = true;
+                        this._hide();
+                    })
+                ],
+                [
+                    Main.overview,
+                    'bolt-hiding',
+                    Lang.bind(this, function(){
+                        this._disableIntellihide = false;
+                        this._updateDockVisibility();
+                    })
+                ]
+            );
+        }
+
+        function disable() {
+            this._signalHandler.disconnectWithLabel(label);
+        }
     }
 
-});
+};

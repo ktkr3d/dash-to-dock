@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-shell-extensions">
-  <enum id='org.gnome.shell.extensions.dash-to-dock.clickAction'>
+  <enum id='org.gnome.shell.extensions.dash-to-dock-on-bottom.clickAction'>
     <value value='0' nick='skip'/>
     <value value='1' nick='minimize'/>
     <value value='2' nick='launch'/>
     <value value='3' nick='cycle-windows'/>
   </enum>
-  <schema path="/org/gnome/shell/extensions/dash-to-dock/" id="org.gnome.shell.extensions.dash-to-dock">
+  <schema path="/org/gnome/shell/extensions/dash-to-dock-on-bottom/" id="org.gnome.shell.extensions.dash-to-dock-on-bottom">
     <key type="d" name="animation-time">
       <default>0.25</default>
       <summary>Animation time</summary>
@@ -128,7 +128,7 @@
       <default>true</default>
       <summary>Activate only one window</summary>
     </key>
-    <key name="click-action" enum="org.gnome.shell.extensions.dash-to-dock.clickAction">
+    <key name="click-action" enum="org.gnome.shell.extensions.dash-to-dock-on-bottom.clickAction">
       <default>'cycle-windows'</default>
       <summary>Action when clicking on a running app</summary>
       <description>Set the action that is executed when clicking on the icon of a running application</description>

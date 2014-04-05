@@ -8,7 +8,7 @@ const Lang = imports.lang;
 const Mainloop = imports.mainloop;
 
 
-const Gettext = imports.gettext.domain('dashtodock');
+const Gettext = imports.gettext.domain('nos-dock');
 const _ = Gettext.gettext;
 const N_ = function(e) { return e };
 
@@ -24,7 +24,7 @@ const WorkspaceSettingsWidget = new GObject.Class({
 
     _init: function(params) {
     this.parent(params);
-    this.settings = Convenience.getSettings('org.gnome.shell.extensions.dash-to-dock');
+    this.settings = Convenience.getSettings('org.gnome.shell.extensions.nos-dock');
 
     let notebook = new Gtk.Notebook();
 
@@ -166,52 +166,52 @@ const WorkspaceSettingsWidget = new GObject.Class({
     dockMonitor.add(dockMonitorLabel)
     dockMonitor.add(dockMonitorCombo);
 
-    let dockSettingsMain2 = new Gtk.Box({orientation:Gtk.Orientation.VERTICAL, homogeneous:false,
-                                        margin_left:10, margin_top:5, margin_bottom:10, margin_right:10});
-    indentWidget(dockSettingsMain2);
+    // let dockSettingsMain2 = new Gtk.Box({orientation:Gtk.Orientation.VERTICAL, homogeneous:false,
+    //                                     margin_left:10, margin_top:5, margin_bottom:10, margin_right:10});
+    // indentWidget(dockSettingsMain2);
 
-    let dockHeightMain = new Gtk.Box({spacing:30, orientation:Gtk.Orientation.HORIZONTAL, homogeneous:false,
-                                       margin:10});
-    indentWidget(dockHeightMain);
-    let dockMaxHeightTimeout=0; // Used to avoid to continuosly update the dock height
-    let dockMaxHeightLabel = new Gtk.Label({label: _("Max height"), xalign: 0});
-    let dockMaxHeight =  new Gtk.Scale({orientation: Gtk.Orientation.HORIZONTAL, valuePos: Gtk.PositionType.RIGHT});
-        dockMaxHeight.set_range(0, 100);
-        dockMaxHeight.set_value(this.settings.get_double('height-fraction')*100);
-        dockMaxHeight.set_digits(0);
-        dockMaxHeight.set_increments(5,5);
-        dockMaxHeight.set_size_request(200, -1);
-        dockMaxHeight.connect('value-changed', Lang.bind(this, function(button){
-            let s = button.get_value()/100;
-            if(dockMaxHeightTimeout>0)
-                Mainloop.source_remove(dockMaxHeightTimeout);
-            dockMaxHeightTimeout = Mainloop.timeout_add(250, Lang.bind(this, function(){
-                this.settings.set_double('height-fraction', s);
-                return false;
-            }));
-        }));
+    // let dockHeightMain = new Gtk.Box({spacing:30, orientation:Gtk.Orientation.HORIZONTAL, homogeneous:false,
+    //                                    margin:10});
+    // indentWidget(dockHeightMain);
+    // let dockMaxHeightTimeout=0; // Used to avoid to continuosly update the dock height
+    // let dockMaxHeightLabel = new Gtk.Label({label: _("Max height"), xalign: 0});
+    // let dockMaxHeight =  new Gtk.Scale({orientation: Gtk.Orientation.HORIZONTAL, valuePos: Gtk.PositionType.RIGHT});
+    //     dockMaxHeight.set_range(0, 100);
+    //     dockMaxHeight.set_value(this.settings.get_double('height-fraction')*100);
+    //     dockMaxHeight.set_digits(0);
+    //     dockMaxHeight.set_increments(5,5);
+    //     dockMaxHeight.set_size_request(200, -1);
+    //     dockMaxHeight.connect('value-changed', Lang.bind(this, function(button){
+    //         let s = button.get_value()/100;
+    //         if(dockMaxHeightTimeout>0)
+    //             Mainloop.source_remove(dockMaxHeightTimeout);
+    //         dockMaxHeightTimeout = Mainloop.timeout_add(250, Lang.bind(this, function(){
+    //             this.settings.set_double('height-fraction', s);
+    //             return false;
+    //         }));
+    //     }));
 
-        dockMaxHeight.connect('format-value', function(scale, value) {return value + '%'});
-    let extendHeight =  new Gtk.CheckButton({label: _("Expand (experimental and buggy)")});
-        extendHeight.set_active(this.settings.get_boolean('extend-height'));
-        extendHeight.connect('toggled', Lang.bind(this, function(check){
-            this.settings.set_boolean('extend-height', check.get_active());
-        }));
+    //     dockMaxHeight.connect('format-value', function(scale, value) {return value + '%'});
+    // let extendHeight =  new Gtk.CheckButton({label: _("Expand (experimental and buggy)")});
+    //     extendHeight.set_active(this.settings.get_boolean('extend-height'));
+    //     extendHeight.connect('toggled', Lang.bind(this, function(check){
+    //         this.settings.set_boolean('extend-height', check.get_active());
+    //     }));
 
-    dockHeightMain.add(dockMaxHeightLabel);
-    dockHeightMain.add(dockMaxHeight);
-    dockHeightMain.add(extendHeight);
+    // dockHeightMain.add(dockMaxHeightLabel);
+    // dockHeightMain.add(dockMaxHeight);
+    // dockHeightMain.add(extendHeight);
 
-    this.settings.bind('extend-height', dockMaxHeightLabel, 'sensitive', Gio.SettingsBindFlags.INVERT_BOOLEAN);
-    this.settings.bind('extend-height', dockMaxHeight, 'sensitive', Gio.SettingsBindFlags.INVERT_BOOLEAN);
+    // this.settings.bind('extend-height', dockMaxHeightLabel, 'sensitive', Gio.SettingsBindFlags.INVERT_BOOLEAN);
+    // this.settings.bind('extend-height', dockMaxHeight, 'sensitive', Gio.SettingsBindFlags.INVERT_BOOLEAN);
 
-    dockSettingsMain2.add(dockHeightMain);
+    // dockSettingsMain2.add(dockHeightMain);
 
     dockSettings.add(dockSettingsControl1);
     dockSettings.add(dockSettingsMain1);
     dockSettings.add(intellihideSubSettings);
     dockSettings.add(dockMonitor);
-    dockSettings.add(dockSettingsMain2);
+    //dockSettings.add(dockSettingsMain2);
 
     /*ICON SIZE*/
 

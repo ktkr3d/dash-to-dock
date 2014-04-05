@@ -25,7 +25,7 @@ function hide(){
 
 function enable() {
 
-    settings = Convenience.getSettings('org.gnome.shell.extensions.dash-to-dock');
+    settings = Convenience.getSettings('org.gnome.shell.extensions.nos-dock');
     dock = new DockedDash.dockedDash(settings);
     intellihide = new Intellihide.intellihide(show, hide, dock, settings);
 

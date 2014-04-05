@@ -1,12 +1,12 @@
 # Basic Makefile
 
-UUID = dash-to-dock@micxgx.gmail.com
+UUID = dash-to-dock-on-bottom@ktkr3d.gmail.com
 BASE_MODULES = extension.js stylesheet.css metadata.json COPYING README.md
 EXTRA_MODULES = dockedDash.js intellihide.js myDash.js convenience.js prefs.js
 TOLOCALIZE =  prefs.js
 MSGSRC = $(wildcard po/*.po)
 INSTALLBASE = ~/.local/share/gnome-shell/extensions
-INSTALLNAME = dash-to-dock@micxgx.gmail.com
+INSTALLNAME = dash-to-dock-on-bottom@ktkr3d.gmail.com
 
 # Use command line passed variable
 ifdef VERSION
@@ -23,7 +23,7 @@ clean:
 
 extension: ./schemas/gschemas.compiled $(MSGSRC:.po=.mo)
 
-./schemas/gschemas.compiled: ./schemas/org.gnome.shell.extensions.dash-to-dock.gschema.xml
+./schemas/gschemas.compiled: ./schemas/org.gnome.shell.extensions.dash-to-dock-on-bottom.gschema.xml
 	glib-compile-schemas ./schemas/
 
 potfile: ./po/dashtodock.pot

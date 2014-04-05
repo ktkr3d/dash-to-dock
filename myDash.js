@@ -1,7 +1,6 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 
 const Clutter = imports.gi.Clutter;
-const GLib = imports.gi.GLib;
 const Signals = imports.signals;
 const Lang = imports.lang;
 const Meta = imports.gi.Meta;
@@ -35,48 +34,41 @@ let DASH_ITEM_HOVER_TIMEOUT = Dash.DASH_ITEM_HOVER_TIMEOUT;
  *
  */
 const myDashActor = new Lang.Class({
-    Name: 'DashToDockmyDashActor',
+    Name: 'Nos-DockmyDashActor',
     Extends: St.Widget,
 
     _init: function(settings) {
         this._settings = settings;
-        let layout = new Clutter.BoxLayout({ orientation: Clutter.Orientation.VERTICAL });
-        this.parent({ name: 'dash',
+        let layout = new Clutter.BoxLayout({ orientation: Clutter.Orientation.HORIZONTAL });
+        this.parent({ name: 'dash',               //This will inherit styling from the original gnome dock
                       layout_manager: layout,
-                      clip_to_allocation: true });
+                      clip_to_allocation: true
+                       });
+        this.set_anchor_point(0,0);
     },
 
     vfunc_allocate: function(box, flags) {
         let contentBox = this.get_theme_node().get_content_box(box);
-        let availWidth = contentBox.x2 - contentBox.x1;
+        let availHeight = contentBox.y2 - contentBox.y1;
 
         this.set_allocation(box, flags);
 
         let [appIcons, showAppsButton] = this.get_children();
-        let [showAppsMinHeight, showAppsNatHeight] = showAppsButton.get_preferred_height(availWidth);
+        let [showAppsMinWidth, showAppsNatWidth] = showAppsButton.get_preferred_width(availHeight);
 
-        let childBox = new Clutter.ActorBox();
-        if( this._settings.get_boolean('show-apps-at-top') ) {
-            childBox.x1 = contentBox.x1;
-            childBox.y1 = contentBox.y1 + showAppsNatHeight;
-            childBox.x2 = contentBox.x2;
-            childBox.y2 = contentBox.y2;
-            appIcons.allocate(childBox, flags);
+        let appBox = new Clutter.ActorBox();
+        appBox.x1 = contentBox.x1;
+        appBox.y1 = contentBox.y1;
+        appBox.x2 = contentBox.x2 - showAppsNatWidth;
+        appBox.y2 = contentBox.y2;
+        appIcons.allocate(appBox, flags);
 
-            childBox.y1 = contentBox.y1;
-            childBox.y2 = contentBox.y1 + showAppsNatHeight;
-            showAppsButton.allocate(childBox, flags);
-        } else {
-            childBox.x1 = contentBox.x1;
-            childBox.y1 = contentBox.y1;
-            childBox.x2 = contentBox.x2;
-            childBox.y2 = contentBox.y2 - showAppsNatHeight;
-            appIcons.allocate(childBox, flags);
-
-            childBox.y1 = contentBox.y2 - showAppsNatHeight;
-            childBox.y2 = contentBox.y2;
-            showAppsButton.allocate(childBox, flags);
-        }
+        let menuBox = new Clutter.ActorBox();
+        menuBox.x1 = appBox.x2;
+        menuBox.y1 = contentBox.y1;
+        menuBox.x2 = appBox.x2 + showAppsNatWidth;
+        menuBox.y2 = contentBox.y2;
+        showAppsButton.allocate(menuBox, flags);
     },
 
     vfunc_get_preferred_height: function(forWidth) {
@@ -108,12 +100,13 @@ const myDashActor = new Lang.Class({
  *
  */
 const myDash = new Lang.Class({
-    Name: 'dashToDock.myDash',
+    Name: 'Nos-Dock.myDash',
 
     _init : function(settings) {
         this._maxHeight = -1;
         this.iconSize = 64;
-        this._avaiableIconSize = Dash.baseIconSizes;
+        this._allIconSize = [ 16, 22, 24, 32, 48, 64 ];
+        this._avaiableIconSize = this._allIconSize;
         this._shownInitially = false;
 
         this._settings = settings;
@@ -127,7 +120,7 @@ const myDash = new Lang.Class({
         this._labelShowing = false;
 
         this._container = new myDashActor(settings);
-        this._box = new St.BoxLayout({ vertical: true,
+        this._box = new St.BoxLayout({ vertical: false,
                                        clip_to_allocation: true });
         this._box._delegate = this;
         this._container.add_actor(this._box);
@@ -155,25 +148,14 @@ const myDash = new Lang.Class({
 
         this._appSystem = Shell.AppSystem.get_default();
 
+        this._appSystem.connect('installed-changed', Lang.bind(this, function() {
+            AppFavorites.getAppFavorites().reload();
+            this._queueRedisplay();
+        }));
+        AppFavorites.getAppFavorites().connect('changed', Lang.bind(this, this._queueRedisplay));
+        this._appSystem.connect('app-state-changed', Lang.bind(this, this._queueRedisplay));
+
         this._signalHandler.push(
-            [
-                this._appSystem,
-                'installed-changed',
-                Lang.bind(this, function() {
-                    AppFavorites.getAppFavorites().reload();
-                    this._queueRedisplay();
-                })
-            ],
-            [
-                AppFavorites.getAppFavorites(),
-                'changed',
-                Lang.bind(this, this._queueRedisplay)
-            ],
-            [
-                this._appSystem,
-                'app-state-changed',
-                Lang.bind(this, this._queueRedisplay)
-            ],
             [
                 Main.overview,
                 'item-drag-begin',
@@ -207,7 +189,7 @@ const myDash = new Lang.Class({
         DND.addDragMonitor(this._dragMonitor);
 
         if (this._box.get_n_children() == 0) {
-            this._emptyDropTarget = new Dash.EmptyDropTargetItem();
+            this._emptyDropTarget = new EmptyDropTargetItem();
             this._box.insert_child_at_index(this._emptyDropTarget, 0);
             this._emptyDropTarget.show(true);
         }
@@ -338,8 +320,7 @@ const myDash = new Lang.Class({
                     Lang.bind(this, function() {
                         this._labelShowing = true;
                         item.showLabel();
-                        this._showLabelTimeoutId = 0;
-                        return GLib.SOURCE_REMOVE;
+                        return false;
                     }));
                 if (this._resetHoverTimeoutId > 0) {
                     Mainloop.source_remove(this._resetHoverTimeoutId);
@@ -355,8 +336,7 @@ const myDash = new Lang.Class({
                 this._resetHoverTimeoutId = Mainloop.timeout_add(DASH_ITEM_HOVER_TIMEOUT,
                     Lang.bind(this, function() {
                         this._labelShowing = false;
-                        this._resetHoverTimeoutId = 0;
-                        return GLib.SOURCE_REMOVE;
+                        return false;
                     }));
             }
         }
@@ -393,26 +373,25 @@ const myDash = new Lang.Class({
         let minHeight, natHeight;
 
         // Enforce the current icon size during the size request
-        firstIcon.setIconSize(this.iconSize);
+        let [currentWidth, currentHeight] = firstIcon.icon.get_size();
+
+        firstIcon.icon.set_size(this.iconSize, this.iconSize);
         [minHeight, natHeight] = firstButton.get_preferred_height(-1);
 
-        let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        let iconSizes = Dash.baseIconSizes.map(function(s) {
-            return s * scaleFactor;
-        });
+        firstIcon.icon.set_size(currentWidth, currentHeight);
 
         // Subtract icon padding and box spacing from the available height
-        availHeight -= iconChildren.length * (natHeight - this.iconSize * scaleFactor) +
+        availHeight -= iconChildren.length * (natHeight - this.iconSize) +
                        (iconChildren.length - 1) * spacing;
 
         let availSize = availHeight / iconChildren.length;
 
         let iconSizes = this._avaiableIconSize;
 
-        let newIconSize = this._avaiableIconSize[0];
+        let newIconSize = 36;
         for (let i = 0; i < iconSizes.length; i++) {
             if (iconSizes[i] < availSize)
-                newIconSize = Dash.baseIconSizes[i];
+                newIconSize = iconSizes[i];
         }
 
         if (newIconSize == this.iconSize)
@@ -592,16 +571,16 @@ const myDash = new Lang.Class({
 
     setMaxIconSize: function(size) {
 
-        if( size>=Dash.baseIconSizes[0] ){
+        if( size>=this._allIconSize[0] ){
 
-            this._avaiableIconSize = Dash.baseIconSizes.filter(
+            this._avaiableIconSize = this._allIconSize.filter(
                 function(val){
                     return (val<=size);
                 }
             );
 
         } else {
-            this._availableIconSize = [ Dash.baseIconSizes[0] ];
+            this._availableIconSize = [ this._allIconSize[0] ];
         }
 
         // Changing too rapidly icon size settings cause the whole Shell to freeze
@@ -909,7 +888,7 @@ const myAppIcon = new Lang.Class({
                 this.emit('launching');
                 if (this._settings.get_enum('click-action') == clickAction.CYCLE_WINDOWS && !Main.overview._shown){
                     // If click cycles through windows I can activate one windows at a time
-                    let windows = getAppInterestingWindows(this.app);
+                    let windows = this.app.get_windows();
                     let w = windows[0];
                     Main.activateWindow(w);
                 } else if(this._settings.get_enum('click-action') == clickAction.LAUNCH)
@@ -931,8 +910,7 @@ const myAppIcon = new Lang.Class({
 
     _updateCounterClass: function() {
 
-        let n = getAppInterestingWindows(this.app).length;
-
+        let n = this.app.get_n_windows();
         if(n>this._maxN)
              n = this._maxN;
 
@@ -948,7 +926,7 @@ const myAppIcon = new Lang.Class({
 
 function minimizeWindow(app, param){
     // Param true make all app windows minimize
-    let windows = getAppInterestingWindows(app);
+    let windows = app.get_windows();
     let current_workspace = global.screen.get_active_workspace();
     for (let i = 0; i < windows.length; i++) {
         let w = windows[i];
@@ -972,7 +950,7 @@ function activateAllWindows(app){
     app.activate();
 
     // then activate all other app windows in the current workspace
-    let windows = getAppInterestingWindows(app);
+    let windows = app.get_windows();
     let activeWorkspace = global.screen.get_active_workspace_index();
 
     if( windows.length<=0)
@@ -994,8 +972,6 @@ function cycleThroughWindows(app) {
     // since the order changes upon window interaction
     let MEMORY_TIME=3000;
 
-    let app_windows = getAppInterestingWindows(app);
-
     if(recentlyClickedAppLoopId>0)
         Mainloop.source_remove(recentlyClickedAppLoopId);
     recentlyClickedAppLoopId = Mainloop.timeout_add(MEMORY_TIME, resetRecentlyClickedApp);
@@ -1004,11 +980,11 @@ function cycleThroughWindows(app) {
     // or the stored list is outdated, use the current windows list.
     if( !recentlyClickedApp ||
         recentlyClickedApp.get_id() != app.get_id() ||
-        recentlyClickedAppWindows.length != app_windows.length
+        recentlyClickedAppWindows.length != app.get_windows().length
       ){
 
         recentlyClickedApp = app;
-        recentlyClickedAppWindows = app_windows;
+        recentlyClickedAppWindows = app.get_windows();
         recentlyClickedAppIndex = 0;
     }
 
@@ -1029,14 +1005,4 @@ function resetRecentlyClickedApp() {
     recentlyClickedAppIndex = 0;
 
     return false;
-}
-
-function getAppInterestingWindows(app) {
-    // Filter out unnecessary windows, for instance
-    // nautilus desktop window.
-    let windows = app.get_windows().filter(function(w) {
-        return !w.skip_taskbar;
-    });
-
-    return windows;
 }

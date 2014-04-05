@@ -20,9 +20,12 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 const MyDash = Me.imports.myDash;
 
+function dockedDash(settings) {
 
-const dockedDash = new Lang.Class({
-    Name: 'dockedDash',
+    this._init(settings);
+}
+
+dockedDash.prototype = {
  
     _init: function(settings) {
 
@@ -51,37 +54,41 @@ const dockedDash = new Lang.Class({
         // Hiding the parent container seems to work properly instead
         // I don't know if it's linked with this bug: https://bugzilla.gnome.org/show_bug.cgi?id=692744.
         // However tha same workaround doesn't work.
-        Main.overview._controls._dashSlider.actor.hide();
+//        Main.overview._controls._dashSlider.actor.hide();
 
         // Create a new dash object
         this.dash = new MyDash.myDash(this._settings); // this.dash = new MyDash.myDash();
         this.forcedOverview = false;
+
+        // Put dock on the primary monitor
+        this._monitor = Main.layoutManager.primaryMonitor;
 
         // connect app icon into the view selector
         this.dash.showAppsButton.connect('notify::checked', Lang.bind(this, this._onShowAppsButtonToggled));
 
         // Create the main actor and the main container for centering, turn on track hover
 
-        this._box = new St.BoxLayout({ name: 'dashtodockBox', reactive: true, track_hover:true,
+        this._box = new St.BoxLayout({ name: 'nos-dockBox', reactive: true, track_hover:true,
             style_class: 'box'} );
-        this.actor = new St.Bin({ name: 'dashtodockContainer',reactive: false,
-            style_class: 'container', y_align: St.Align.MIDDLE, child: this._box});
+        this.actor = new St.Bin({ name: 'nos-dockContainer',reactive: false,
+            style_class: 'container', x_align: St.Align.MIDDLE, child: this._box});
 
         this._box.connect("notify::hover", Lang.bind(this, this._hoverChanged));
         this._realizeId = this.actor.connect("realize", Lang.bind(this, this._initialize));
 
         // Create and apply height constraint to the dash. It's controlled by this.actor height
-        this.actor.height = Main.overview.viewSelector.actor.height; // Guess initial reasonable height.
+        this.actor.width = this._monitor.width; //Main.overview.viewSelector.actor.height; // Guess initial reasonable height.
+        this.actor.height = 64;
+        this.actor.set_y(this._monitor.height-this.actor.height);
         this.constrainHeight = new Clutter.BindConstraint({ source: this.actor,
                                                             coordinate: Clutter.BindCoordinate.HEIGHT });
         this.dash.actor.add_constraint(this.constrainHeight);
 
-        // Put dock on the primary monitor
-        this._monitor = Main.layoutManager.primaryMonitor;
+        
 
         // this store size and the position where the dash is shown;
         // used by intellihide module to check window overlap.
-        this.staticBox = new Clutter.ActorBox({x1:0, y1:0, x2:100, y2:500});
+        this.staticBox = new Clutter.ActorBox({x1:0, y1:0, x2:500, y2:100});
 
         // Connect global signals
         this._signalHandler.push(
@@ -107,6 +114,12 @@ const dockedDash = new Lang.Class({
                 global.screen,
                 'monitors-changed',
                 Lang.bind(this, this._resetPosition )
+            ],
+            // keep the dock above Main.wm._workspaceSwitcherPopup.actor
+            [
+                global.window_manager,
+                'switch-workspace',
+                Lang.bind(this, this._onSwitchWorkspace)
             ],
             // When theme changes re-obtain default background color
             [
@@ -201,8 +214,6 @@ const dockedDash = new Lang.Class({
 
         // Disconnect global signals
         this._signalHandler.disconnect();
-        // The dash has global signals as well internally
-        this.dash.destroy();
         // Destroy main clutter actor: this should be sufficient
         // From clutter documentation:
         // If the actor is inside a container, the actor will be removed.
@@ -253,30 +264,20 @@ const dockedDash = new Lang.Class({
                 this.emit('box-changed');
             }
 
-            this._updateYPosition();
+            this._updateXPosition();
         }));
         this._settings.connect('changed::autohide', Lang.bind(this, function(){
             this.emit('box-changed');
         }));
-        this._settings.connect('changed::extend-height', Lang.bind(this, this._updateYPosition));
+        this._settings.connect('changed::extend-height', Lang.bind(this, this._updateXPosition));
         this._settings.connect('changed::preferred-monitor', Lang.bind(this,this._resetPosition));
-        this._settings.connect('changed::height-fraction', Lang.bind(this,this._updateYPosition));
+        this._settings.connect('changed::height-fraction', Lang.bind(this,this._updateXPosition));
 
     },
 
     _hoverChanged: function() {
-
-        // Skip if dock is not in autohide mode for instance because it is shown
-        // by intellihide. Delay the hover changes check while switching
-        // workspace: the workspaceSwitcherPopup steals the hover status and it
-        // is not restored until the mouse move again (sync_hover has no effect).
-        if(Main.wm._workspaceSwitcherPopup) {
-            Mainloop.timeout_add(500, Lang.bind(this, function() {
-                    this._box.sync_hover();
-                    this._hoverChanged();
-                    return false;
-                }));
-        } else if(this._settings.get_boolean('autohide') && this._autohideStatus) {
+        // Skip if dock is not in autohide mode for instance because it is shown by intellihide
+        if(this._settings.get_boolean('autohide') && this._autohideStatus){
             if( this._box.hover ) {
                 this._show();
             } else {
@@ -384,10 +385,12 @@ const dockedDash = new Lang.Class({
         // the dash stays at the right position
         if(this._rtl){
             anchor_point = Clutter.Gravity.NORTH_WEST;
-            final_position = this.staticBox.x2 - 1;
+            //final_position = this.staticBox.x2 - 1;
+            final_position = this.staticBox.y2 - 1;
         } else {
             anchor_point = Clutter.Gravity.NORTH_EAST;
-            final_position = this.staticBox.x1 + 1;
+            //final_position = this.staticBox.x1 + 1;
+            final_position = this.staticBox.y1 + 1;
         }
 
         /* Animate functions are also used for 'hard' position reset with time==0
@@ -510,7 +513,7 @@ const dockedDash = new Lang.Class({
              this._monitor.y == Main.layoutManager.primaryMonitor.y);
     },
 
-    _updateYPosition: function() {
+/*    _updateYPosition: function() {
 
         let unavailableTopSpace = 0;
         let unavailableBottomSpace = 0;
@@ -539,6 +542,47 @@ const dockedDash = new Lang.Class({
         this.actor.y_align = St.Align.MIDDLE;
 
         if(extendHeight){
+            this.dash._container.set_height(this.actor.height);
+            this.actor.add_style_class_name('extended');
+        } else {
+            this.dash._container.set_height(-1);
+            this.actor.remove_style_class_name('extended');
+        }
+
+        this._updateStaticBox();
+    },
+*/
+
+    //Replaces _updateYPosition()
+     _updateXPosition: function() {
+
+        let unavailableLeftSpace = 0;
+        let unavailableRightSpace = 0;
+
+        let extendWidth = this._settings.get_boolean('extend-height'); //TODO: change schema to extend-width
+        let dockFixed = this._settings.get_boolean('dock-fixed');
+
+        // check if the dock is on the primary monitor
+        if (this._isPrimaryMonitor()){
+            if (!extendWidth || !dockFixed) {
+                unavailableLeftSpace = 0;
+            }
+        }
+
+        let availableWidth = this._monitor.width;
+
+        let fraction = this._settings.get_double('height-fraction'); //TODO: change schema to width-fraction
+
+        if(extendWidth)
+            fraction = 1;
+        else if(fraction<0 || fraction >1)
+            fraction = 0.95;
+
+        this.actor.width = Math.round( fraction * availableWidth);
+        this.actor.x = this._monitor.x + Math.round( (1-fraction)/2 * availableWidth);
+        this.actor.x_align = St.Align.MIDDLE;
+
+        if(extendWidth){
             this.dash._container.set_height(this.actor.height);
             this.actor.add_style_class_name('extended');
         } else {
@@ -577,25 +621,16 @@ const dockedDash = new Lang.Class({
     _updateStaticBox: function() {
 
         this.staticBox.init_rect(
-            this._monitor.x + (this._rtl?(this._monitor.width - this._box.width):0),
-            this.actor.y + this._box.y,
-            this._box.width,
-            this._box.height
+            this._monitor.y + (this._rtl?(this._monitor.height - this._box.height):0),
+            this.actor.x + this._box.x,
+            this._box.height,
+            this._box.width
         );
 
         // If allocation is changed, probably also the clipping has to be updated.
         this._updateClip();
 
-        // This prevents an allocation cycle warning. Somehow changing the topbar
-        // allocation causes an allocation of the dock actor and thus the cycle I
-        // think. This happens only if _updateStaticBox is called upon the
-        // allocation event (why?). This seems to prevent the warning and I checked
-        // that the function is called once to be sure.
-        Mainloop.timeout_add(10,
-                Lang.bind(this, function(){
-                  this._updateMainPanel();
-                  return false;
-                }));
+        this._updateMainPanel();
 
         this.emit('box-changed');
     },
@@ -610,7 +645,7 @@ const dockedDash = new Lang.Class({
             this._animateOut(0,0);
             this._animateIn(this._settings.get_double('animation-time'),0);
         }
-        this._updateYPosition();
+        this._updateXPosition();
         this._updateClip();
     },
 
@@ -656,6 +691,15 @@ const dockedDash = new Lang.Class({
             this._animateIn(this._settings.get_double('animation-time'), 0);
         } else {
             this._animateOut(this._settings.get_double('animation-time'), 0);
+        }
+    },
+
+    _onSwitchWorkspace: function(){
+        // workspace switcher group actor is stealing my focus when 
+        // switching workspaces! Sometimes my actor is placed below it; 
+        // try to keep it above.
+        if(Main.wm._workspaceSwitcherPopup) {
+            this.actor.raise(Main.wm._workspaceSwitcherPopup.actor);
         }
     },
 
@@ -866,7 +910,7 @@ const dockedDash = new Lang.Class({
                 this._fadeInBackground(this._settings.get_double('animation-time'), delay);
         }
     }
-});
+};
 
 Signals.addSignalMethods(dockedDash.prototype);
 
@@ -874,8 +918,11 @@ Signals.addSignalMethods(dockedDash.prototype);
  * Store animation status in a perhaps overcomplicated way.
  * status is true for visible, false for hidden
  */
-const animationStatus = new Lang.Class({
-    Name: 'AnimationStatus',
+function animationStatus(initialStatus){
+    this._init(initialStatus);
+}
+
+animationStatus.prototype = {
 
     _init: function(initialStatus){
         this.status  = initialStatus;
@@ -948,4 +995,4 @@ const animationStatus = new Lang.Class({
         else
             return false;
     }
-});
+}
