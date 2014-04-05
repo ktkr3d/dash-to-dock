@@ -14,3 +14,10 @@ or download the branch from github. A simple Makefile is included. Then run
 make install
 </pre>
 to install the extension in your home directory. A Shell reload is required <code>Alt+F2 r Enter</code> and the extension has to be enabled  with *gnome-tweak-tool* or with *dconf*.
+
+## TODO
+- _showLabel
+- autohide
+- drag and drop
+- overview
+- resize

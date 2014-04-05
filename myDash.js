@@ -287,6 +287,38 @@ const myDash = new Lang.Class({
         appIcon.actor.label_actor = null;
         item.setLabelText(app.get_name());
 
+		item.showLabel = function () {
+			if (!this._labelText)
+				return;
+
+			this.label.set_text(this._labelText);
+			this.label.opacity = 0;
+			this.label.show();
+
+			let [stageX, stageY] = this.get_transformed_position();
+
+			let itemWidth = this.allocation.x2 - this.allocation.x1;
+
+			let labelWidth = this.label.get_width();
+			let xOffset = Math.floor((itemWidth - labelWidth) / 2)
+
+			let x = stageX - xOffset;
+
+			let node = this.label.get_theme_node();
+			let yOffset = node.get_length('-y-offset');
+
+			let y;
+//			y = stageY + this.get_height() + yOffset;
+			y = stageY + yOffset;
+
+			this.label.set_position(x, y);
+			Tweener.addTween(this.label,
+							 { opacity: 255,
+							   time: DASH_ITEM_LABEL_SHOW_TIME,
+							   transition: 'easeOutQuad',
+							 });
+		}
+
         appIcon.icon.setIconSize(this.iconSize);
         this._hookUpLabel(item, appIcon);
 

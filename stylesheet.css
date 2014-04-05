@@ -11,6 +11,5 @@
 }
 
 .dash-label {
-    -x-offset: 8px !important;
-    -y-offset: 0px !important;
+    -y-offset: -40px !important;
 }
