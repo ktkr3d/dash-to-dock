@@ -1,8 +1,16 @@
-#dashtodockBox:ltr {
+#nos-dockBox:ltr {
 	padding-right:1px;
 }
 
-#dashtodockBox:rtl {
+#nos-dockBox:rtl {
 	padding-left:1px;
 }
 
+#dash {
+    border-radius: 9px 9px 0px 0px !important;
+}
+
+.dash-label {
+    -x-offset: 8px !important;
+    -y-offset: 0px !important;
+}
