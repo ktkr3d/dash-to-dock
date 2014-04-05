@@ -1,6 +1,7 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 
 const Clutter = imports.gi.Clutter;
+const GLib = imports.gi.GLib;
 const Signals = imports.signals;
 const Lang = imports.lang;
 const Meta = imports.gi.Meta;
@@ -34,7 +35,7 @@ let DASH_ITEM_HOVER_TIMEOUT = Dash.DASH_ITEM_HOVER_TIMEOUT;
  *
  */
 const myDashActor = new Lang.Class({
-    Name: 'Nos-DockmyDashActor',
+    Name: 'DDB-DockmyDashActor',
     Extends: St.Widget,
 
     _init: function(settings) {
@@ -100,7 +101,7 @@ const myDashActor = new Lang.Class({
  *
  */
 const myDash = new Lang.Class({
-    Name: 'Nos-Dock.myDash',
+    Name: 'DDB-Dock.myDash',
 
     _init : function(settings) {
         this._maxHeight = -1;

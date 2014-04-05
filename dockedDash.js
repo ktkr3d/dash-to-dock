@@ -68,9 +68,9 @@ dockedDash.prototype = {
 
         // Create the main actor and the main container for centering, turn on track hover
 
-        this._box = new St.BoxLayout({ name: 'nos-dockBox', reactive: true, track_hover:true,
+        this._box = new St.BoxLayout({ name: 'ddb-dockBox', reactive: true, track_hover:true,
             style_class: 'box'} );
-        this.actor = new St.Bin({ name: 'nos-dockContainer',reactive: false,
+        this.actor = new St.Bin({ name: 'ddb-dockContainer',reactive: false,
             style_class: 'container', x_align: St.Align.MIDDLE, child: this._box});
 
         this._box.connect("notify::hover", Lang.bind(this, this._hoverChanged));

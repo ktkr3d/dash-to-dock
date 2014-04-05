@@ -8,7 +8,7 @@ const Lang = imports.lang;
 const Mainloop = imports.mainloop;
 
 
-const Gettext = imports.gettext.domain('nos-dock');
+const Gettext = imports.gettext.domain('dastodock');
 const _ = Gettext.gettext;
 const N_ = function(e) { return e };
 
@@ -24,7 +24,7 @@ const WorkspaceSettingsWidget = new GObject.Class({
 
     _init: function(params) {
     this.parent(params);
-    this.settings = Convenience.getSettings('org.gnome.shell.extensions.nos-dock');
+    this.settings = Convenience.getSettings('org.gnome.shell.extensions.dash-to-dock-on-bottom');
 
     let notebook = new Gtk.Notebook();
 
