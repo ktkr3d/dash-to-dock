@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Power Off
+TryExec=/usr/bin/gnome-session-quit
+Exec=/usr/bin/gnome-session-quit --power-off
+Icon=system-shutdown
+Terminal=false
+Type=Application
+Categories=System;
+Version=1.0
+X-Ubuntu-Gettext-Domain=indicator-session
