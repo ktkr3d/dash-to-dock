@@ -346,13 +346,13 @@ dockedDash.prototype = {
 
         // Move anchor point so mode so that when dash icon size changes
         // the dash stays at the right position
-        if(this._rtl){
-            anchor_point = Clutter.Gravity.NORTH_EAST;
-            final_position = this.staticBox.x2;
-        } else {
-            anchor_point = Clutter.Gravity.NORTH_WEST;
-            final_position = this.staticBox.x1;
-        }
+//        if(this._rtl){
+//            anchor_point = Clutter.Gravity.NORTH_EAST;
+//            final_position = this.staticBox.x2;
+//        } else {
+            anchor_point = Clutter.Gravity.SOUTH_WEST;
+            final_position = this.staticBox.y1 + this._box.height;
+//        }
 
         /* Animate functions are also used for 'hard' position reset with time==0
          * and delay==0 since they keep this._animStatus in sync. But I really
@@ -364,7 +364,7 @@ dockedDash.prototype = {
 
         this._animStatus.queue(true);
         Tweener.addTween(this.actor,{
-            x: final_position,
+            y: final_position,
             time: time,
             delay: delay,
             transition: 'easeOutQuad',
@@ -384,15 +384,15 @@ dockedDash.prototype = {
 
         // Move anchor point so that when dash icon size changes
         // the dash stays at the right position
-        if(this._rtl){
+//        if(this._rtl){
+//            anchor_point = Clutter.Gravity.NORTH_WEST;
+//            //final_position = this.staticBox.x2 - 1;
+//            final_position = this.staticBox.y2 - 1;
+//        } else {
             anchor_point = Clutter.Gravity.NORTH_WEST;
-            //final_position = this.staticBox.x2 - 1;
-            final_position = this.staticBox.y2 - 1;
-        } else {
-            anchor_point = Clutter.Gravity.NORTH_EAST;
             //final_position = this.staticBox.x1 + 1;
-            final_position = this.staticBox.y1 + 1;
-        }
+            final_position = this.staticBox.y1 + 1 + this._box.height;
+//        }
 
         /* Animate functions are also used for 'hard' position reset with time==0
          * and delay==0 since they keep this._animStatus in sync. But I really
@@ -404,7 +404,7 @@ dockedDash.prototype = {
 
         this._animStatus.queue(false);
         Tweener.addTween(this.actor,{
-            x: final_position,
+            y: final_position,
             time: time,
             delay: delay ,
             transition: 'easeOutQuad',
