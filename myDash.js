@@ -300,9 +300,10 @@ const myDash = new Lang.Class({
 			let itemWidth = this.allocation.x2 - this.allocation.x1;
 
 			let labelWidth = this.label.get_width();
-			let xOffset = Math.floor((itemWidth - labelWidth) / 2)
+			let xOffset = Math.floor((itemWidth - labelWidth) / 2);
 
-			let x = stageX - xOffset;
+//			let x = stageX + xOffset;
+			let x = stageX;
 
 			let node = this.label.get_theme_node();
 			let yOffset = node.get_length('-y-offset');
