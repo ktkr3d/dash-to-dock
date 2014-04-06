@@ -112,6 +112,10 @@ msgstr "お気に入りのアプリケーションアイコンを表示する"
 msgid "Show running application icons"
 msgstr "実行中のアプリケーションアイコンを表示する"
 
+#: prefs.js:265
+msgid "Show applications button at the top"
+msgstr "アプリケーションアイコンを先頭に表示する"
+
 #: prefs.js:276
 msgid "Optional features"
 msgstr "オプション機能"
@@ -143,6 +147,10 @@ msgstr "画面端に接する 1px の領域だけスクロールに反応させ�
 #: prefs.js:356
 msgid "All the area of the dock is active"
 msgstr "Dock 上のすべての領域をスクロールに反応させる"
+
+#: prefs.js:360
+msgid "Deadtime between each workspace switching [ms]"
+msgstr "ワークスペース切り替えの間の無反応時間[ms]"
 
 #: prefs.js:378
 msgid "Customize actions on mouse click"
