@@ -88,7 +88,8 @@ dockedDash.prototype = {
 
         // this store size and the position where the dash is shown;
         // used by intellihide module to check window overlap.
-        this.staticBox = new Clutter.ActorBox({x1:0, y1:0, x2:500, y2:100});
+//        this.staticBox = new Clutter.ActorBox({x1:0, y1:0, x2:500, y2:100});
+        this.staticBox = new Clutter.ActorBox({x1:0, y1:this._monitor.height - 50, x2:this._monitor.width, y2:this._monitor.height});
 
         // Connect global signals
         this._signalHandler.push(
@@ -621,10 +622,25 @@ dockedDash.prototype = {
     _updateStaticBox: function() {
 
         this.staticBox.init_rect(
+			// original
+			/*
+            this._monitor.x + (this._rtl?(this._monitor.width - this._box.width):0),
+            this.actor.y + this._box.y,
+            this._box.width,
+            this._box.height
+            */
+            // nos
+            /*
             this._monitor.y + (this._rtl?(this._monitor.height - this._box.height):0),
             this.actor.x + this._box.x,
             this._box.height,
             this._box.width
+            */
+			// DDB
+			0,
+			this._monitor.height - this._box.height,
+			this._monitor.width,
+			this._monitor.height
         );
 
         // If allocation is changed, probably also the clipping has to be updated.
