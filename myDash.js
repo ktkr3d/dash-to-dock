@@ -685,22 +685,22 @@ const myDash = new Lang.Class({
 
         let children = this._box.get_children();
         let numChildren = children.length;
-        let boxHeight = 0;
+        let boxWidth = 0;
         for (let i = 0; i < numChildren; i++) {
-            boxHeight += children[i].height;
+            boxWidth += children[i].width;
         }
 
         // Keep the placeholder out of the index calculation; assuming that
         // the remove target has the same size as "normal" items, we don't
         // need to do the same adjustment there.
         if (this._dragPlaceholder) {
-            boxHeight -= this._dragPlaceholder.height;
+            boxWidth -= this._dragPlaceholder.width;
             numChildren--;
         }
 
         let pos;
         if (!this._emptyDropTarget){
-            pos = Math.floor(y * numChildren / boxHeight);
+            pos = Math.floor(x * numChildren / boxWidth);
             if (pos >  numChildren)
                 pos = numChildren;
         } else
@@ -727,8 +727,8 @@ const myDash = new Lang.Class({
             }
 
             this._dragPlaceholder = new Dash.DragPlaceholderItem();
-            this._dragPlaceholder.child.set_width (this.iconSize);
-            this._dragPlaceholder.child.set_height (this.iconSize / 2);
+            this._dragPlaceholder.child.set_width (this.iconSize / 2);
+            this._dragPlaceholder.child.set_height (this.iconSize);
             this._box.insert_child_at_index(this._dragPlaceholder,
                                             this._dragPlaceholderPos);
             this._dragPlaceholder.show(fadeIn);

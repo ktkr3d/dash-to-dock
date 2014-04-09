@@ -16,9 +16,7 @@ make install
 to install the extension in your home directory. A Shell reload is required <code>Alt+F2 r Enter</code> and the extension has to be enabled  with *gnome-tweak-tool* or with *dconf*.
 
 ## TODO
-- showLabel position
 - autohide
-- drag and drop
 - overview
 - resize
 - wheel action
