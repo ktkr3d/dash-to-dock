@@ -54,7 +54,7 @@ dockedDash.prototype = {
         // Hiding the parent container seems to work properly instead
         // I don't know if it's linked with this bug: https://bugzilla.gnome.org/show_bug.cgi?id=692744.
         // However tha same workaround doesn't work.
-//        Main.overview._controls._dashSlider.actor.hide();
+        Main.overview._controls._dashSlider.actor.hide();
 
         // Create a new dash object
         this.dash = new MyDash.myDash(this._settings); // this.dash = new MyDash.myDash();
@@ -663,6 +663,8 @@ dockedDash.prototype = {
         }
         this._updateXPosition();
         this._updateClip();
+
+        Main.overview.viewSelector.actor.set_style('padding-bottom: ' + this.actor.height + 'px;');
     },
 
     _getMonitor: function(){
