@@ -19,7 +19,7 @@ const Convenience = Me.imports.convenience;
 
 const WorkspaceSettingsWidget = new GObject.Class({
     Name: 'WorkspaceIndicator.WorkspaceSettingsWidget',
-    GTypeName: 'WorkspaceSettingsWidget',
+    GTypeName: 'WorkspaceSettingsWidgetDDB',
     Extends: Gtk.Box,
 
     _init: function(params) {
